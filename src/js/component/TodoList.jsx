@@ -5,7 +5,8 @@ export const TodoList = () => {
   const [ task, setTask ] = useState('');
   const [ idList, setIdList] = useState(0);
   const [ list, setList ] = useState();
-  const [ posts, setPosts] = useState();
+  const [ edit, setEdit] = useState(false);
+  const [ currentTodo, setCurrentTodo ] = useState();
   const host = 'https://playground.4geeks.com/todo'
 
 
@@ -21,6 +22,34 @@ export const TodoList = () => {
     } else {
       setTask('');
     } 
+  }
+  const handleEdit = async (event) => {
+    event.preventDefault();
+    const editTodo = {
+      label: currentTodo.label,
+      is_done: currentTodo.is_done
+    }
+    const uri = host + '/todos/' + currentTodo.id
+    const options = {
+      method: 'PUT',
+      body: JSON.stringify(editTodo),
+      headers: {
+        'Content-type': 'application/json; charset=UTF-8',
+      },
+    }
+    const response = await fetch(uri, options);
+    if(!response.ok){
+      console.log('Error: ', response.status);
+      return
+    }
+    getList()
+    setCurrentTodo({})
+    setEdit(false)
+  }
+
+  const editTask = (item) => {
+    setEdit(true)
+    setCurrentTodo(item)
   }
 
   const deleteTask = async (item) => {
@@ -52,6 +81,8 @@ export const TodoList = () => {
     }
     getList()
   }
+
+  
  
   const getList = async() => {
     const uri = host + '/users/paurb';
@@ -75,12 +106,30 @@ export const TodoList = () => {
     <div className="container col-10 col-sm-8 col-md-6">
       <h1 className="text-primary">todos</h1>
       <div className="mt-2">
-        <form onSubmit={handleSumbit}>
+        {edit ? 
+        <div> 
+          <h2 className="my-4">Editar Tarea</h2>
+          <form onSubmit={handleEdit}>
             <input type="text" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-              value={task}
-              onChange={(event) => setTask(event.target.value)}
+              value={currentTodo.label}
+              onChange={(event) => setCurrentTodo({...currentTodo, label: event.target.value})}
               />
-        </form>
+          </form>
+        </div>
+      :
+        <div> 
+          <h2 className="my-4">Añadir Tarea</h2>
+          <form onSubmit={handleSumbit}>
+            <input type="text" className="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
+            value={task}
+            onChange={(event) => setTask(event.target.value)}
+            />
+          </form>
+        </div>
+        }
+        
+        <h2 className="my-4">Todo List</h2>
+
         {!list ? '':
         <ul className="list-group">
           {list.map((item, id) =>
