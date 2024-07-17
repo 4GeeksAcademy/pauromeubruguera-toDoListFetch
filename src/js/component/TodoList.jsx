@@ -43,7 +43,6 @@ export const TodoList = () => {
       return
     }
     getList()
-    setCurrentTodo({})
     setEdit(false)
   }
 
